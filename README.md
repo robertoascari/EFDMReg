@@ -139,8 +139,7 @@ dim(beta_chain)
 t(apply(beta_chain, 2:3, mean))
 beta
 
-hist(rstan::extract(fit.EFDM, pars = "aplus")[[1]], prob = T,
-      main = "Posterior distribution of aplus")
+hist(rstan::extract(fit.EFDM, pars = "aplus")[[1]], prob = T, main = "Posterior distribution of aplus")
 abline(v = aplus, col = 2, lty = "dashed", lwd = 2)
 ```
 
