@@ -1,4 +1,11 @@
+# EFDMReg Package
 
+<!-- badges: start -->
+
+<!-- badges: end -->
+
+First of all, import some necessary libraries.
+```r
 #library(FlexReg)
 library(LearnBayes)
 library(ggplot2)
@@ -6,19 +13,23 @@ library(loo)
 library(rstan)
 rstan_options(auto_write = TRUE)
 Sys.setenv(LOCAL_CPPFLAGS = '-march=native')
+```
 
+Then, import stan models and create objects that can be used by the `rstan::sampling()` function.
+
+```r
 wd_stanmodels <- "inst/stan/"
 
 Mult <- rstan::stan_model(file=paste(wd_stanmodels,"/Multinomial.stan",sep=""))
 DM <- rstan::stan_model(file=paste(wd_stanmodels,"/DM.stan",sep=""))
 FDM <- rstan::stan_model(file=paste(wd_stanmodels,"/FDM2.stan",sep=""))
 EFDM <- rstan::stan_model(file=paste(wd_stanmodels,"/EFDM_hyper_w.stan",sep=""))
-
-# Functions to generate data from an EFDMReg model
-source("R/EFD_Functions.R")
-
+```
 
 # Generating the data:
+
+```r
+source("R/EFD_Functions.R")
 
 set.seed(396)
 N <- 300 # Sample size
@@ -56,8 +67,13 @@ par(mfrow=c(2,2))
 for(j in 1:D)
   plot(Y[,j]/n~ X[,2], pch=20)
 par(mfrow=c(1,1))
+```
 
+# Fitting stan models.
 
+First of all, we need to create a list containing all the data required by the stan models' `data` block  
+
+```r
 # Stan setting:
 n.iter <- 8000
 nchain <- 1
@@ -75,8 +91,6 @@ data.stan <- list(
   w_hyper = rep(1, D)
 )
 
-
-
 # Fitting the stan models:
 fit.Mult <- rstan::sampling(
   object = Mult,
@@ -87,7 +101,6 @@ fit.Mult <- rstan::sampling(
   refresh = n.iter/100
 )
 
-
 fit.DM <- rstan::sampling(
   object = DM,
   data = data.stan,
@@ -96,7 +109,6 @@ fit.DM <- rstan::sampling(
   pars=c("beta_raw", "aplus", "log_lik"),
   refresh = n.iter/100
 )
-
 
 fit.FDM <- rstan::sampling(
   object = FDM,
@@ -107,8 +119,6 @@ fit.FDM <- rstan::sampling(
   refresh = n.iter/100
 )
 
-
-
 fit.EFDM <- rstan::sampling(
   object = EFDM,
   data = data.stan,
@@ -116,7 +126,10 @@ fit.EFDM <- rstan::sampling(
   cores = 1, thin=1, chains = nchain,
   pars=c("beta_raw", "aplus", "p", "w_norm", "log_lik"), refresh = n.iter/100
 )
+```
+We can use the fitted models to explore posterior distributions:
 
+```r
 rstan::summary(fit.EFDM, pars=c("beta_raw", "aplus", "p", "w_norm"))$summary
 
 beta_chain <- rstan::extract(fit.EFDM, pars="beta_raw")[[1]]
@@ -125,3 +138,10 @@ dim(beta_chain)
 # Comparing the true and estimated values:
 t(apply(beta_chain, 2:3, mean))
 beta
+
+hist(rstan::extract(fit.EFDM, pars = "aplus")[[1]], prob = T,
+      main = "Posterior distribution of aplus")
+abline(v = aplus, col = 2, lty = "dashed", lwd = 2)
+```
+
+
