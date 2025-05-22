@@ -77,7 +77,7 @@ First of all, we need to create a list containing all the data required by the s
 # Stan setting:
 n.iter <- 8000
 nchain <- 1
-warm <- .5
+warmup = 0.5*n.iter
 
 # Data required by stan models:
 data.stan <- list(
@@ -95,7 +95,7 @@ data.stan <- list(
 fit.Mult <- rstan::sampling(
   object = Mult,
   data = data.stan,
-  warmup = 0.5*n.iter, iter = n.iter,
+  warmup = warmup, iter = n.iter,
   cores = 1, thin=1, chains = nchain,
   pars=c("beta_raw", "log_lik"),
   refresh = n.iter/100
@@ -104,7 +104,7 @@ fit.Mult <- rstan::sampling(
 fit.DM <- rstan::sampling(
   object = DM,
   data = data.stan,
-  warmup = 0.5*n.iter, iter = n.iter,
+  warmup = warmup, iter = n.iter,
   cores = 1, thin=1, chains = nchain,
   pars=c("beta_raw", "aplus", "log_lik"),
   refresh = n.iter/100
@@ -113,7 +113,7 @@ fit.DM <- rstan::sampling(
 fit.FDM <- rstan::sampling(
   object = FDM,
   data = data.stan,
-  warmup = 0.5*n.iter, iter = n.iter,
+  warmup = warmup, iter = n.iter,
   cores = 1, thin=1, chains = nchain,
   pars=c("beta_raw", "aplus", "p", "w_norm", "log_lik"),
   refresh = n.iter/100
@@ -122,7 +122,7 @@ fit.FDM <- rstan::sampling(
 fit.EFDM <- rstan::sampling(
   object = EFDM,
   data = data.stan,
-  warmup = 0.5*n.iter, iter = n.iter,
+  warmup = warmup, iter = n.iter,
   cores = 1, thin=1, chains = nchain,
   pars=c("beta_raw", "aplus", "p", "w_norm", "log_lik"), refresh = n.iter/100
 )
